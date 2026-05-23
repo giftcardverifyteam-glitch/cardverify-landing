@@ -1,0 +1,15 @@
+{
+  "name": "cardverify",
+  "version": "1.0.0",
+  "description": "Validation de cartes cadeaux — Frontend glassmorphism + Serverless Vercel + Resend",
+  "private": true,
+  "license": "MIT",
+  "engines": { "node": ">=18.0.0" },
+  "scripts": {
+    "dev":    "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "resend": "3.0.0"
+  }
+}

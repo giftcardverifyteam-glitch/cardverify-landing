@@ -1,0 +1,23 @@
+# ─── Node ────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-error.log*
+package-lock.json
+
+# ─── Vercel ───────────────────────────────
+.vercel/
+
+# ─── Env / Secrets ────────────────────────
+.env
+.env.local
+.env.production
+.env.*
+
+# ─── OS ───────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ─── Editors ──────────────────────────────
+.vscode/
+.idea/
+*.swp

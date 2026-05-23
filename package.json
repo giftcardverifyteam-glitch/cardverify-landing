@@ -1,0 +1,17 @@
+{
+  "name": "cardverify",
+  "version": "1.0.0",
+  "description": "Système de validation de cartes cadeaux — Frontend glassmorphism + API serverless Vercel + emails Resend",
+  "private": true,
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "resend": "^3.2.0"
+  }
+}
